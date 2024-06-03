@@ -24,7 +24,7 @@
 html {
   box-sizing: border-box;
   scroll-behavior: smooth;
-  padding: 20px 15px;
+  /* padding: 5px; */
 }
 
 body {
