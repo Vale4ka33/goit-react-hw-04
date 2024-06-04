@@ -10,7 +10,7 @@ export const fetchImages = async (
   color,
   orientation
 ) => {
-  const response = await axios.get("/photos", {
+  const response = await axios.get("/search/photos", {
     params: {
       query,
       page,
@@ -21,5 +21,5 @@ export const fetchImages = async (
       client_id: "l-kGt3-mqxSrEvCYzUICKZOTNNe8lBSyukoITC0joU4",
     },
   });
-  return response.data;
+  return response.data.results;
 };

@@ -1,6 +1,9 @@
 import { useState } from "react";
 import SearchBar from "./components/SearchBar/SearchBar";
 import ImageGallery from "./components/ImageGallery/ImageGallery";
+import ErrorMessage from "./components/ErrorMessage/ErrorMessage";
+import Loader from "./components/Loader/Loader";
+import LoadMoreBtn from "./components/LoadMoreBtn/LoadMoreBtn";
 import { fetchImages } from "./fetch-api";
 import { Toaster } from "react-hot-toast";
 
@@ -8,6 +11,9 @@ function App() {
   const [images, setImages] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(false);
+  const [page, setPage] = useState(1);
+  const [query, setQuery] = useState("");
+  const [totalPages, setTotalPages] = useState(1);
 
   const handleSearch = async (newQuery) => {
     try {
@@ -17,6 +23,22 @@ function App() {
 
       const data = await fetchImages(newQuery);
       setImages(data);
+      setPage(1);
+      setQuery(newQuery);
+    } catch (error) {
+      setError(true);
+    } finally {
+      setLoading(false);
+    }
+  };
+  const loadMoreImages = async () => {
+    try {
+      setLoading(true);
+
+      const nextPage = page + 1;
+      const data = await fetchImages(query, nextPage);
+      setImages((prevImages) => [...prevImages, ...data]);
+      setPage(nextPage);
     } catch (error) {
       setError(true);
     } finally {
@@ -27,8 +49,6 @@ function App() {
   return (
     <div>
       <SearchBar onSubmit={handleSearch} />
-      {loading && <p>Loading images.....</p>}
-      {error && <p>Oooops error</p>}
       <Toaster
         position="bottom-right"
         toastOptions={{
@@ -40,7 +60,11 @@ function App() {
           },
         }}
       />
-      <ImageGallery images={images} />
+      {error ? <ErrorMessage /> : <ImageGallery images={images} />}
+      {loading && <Loader />}
+      {images.length > 0 && !loading && (
+        <LoadMoreBtn onLoadMore={loadMoreImages} />
+      )}
     </div>
   );
 }
