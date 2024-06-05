@@ -1,11 +1,12 @@
-import { useEffect, useState } from "react";
+import { useState, useEffect } from "react";
 import SearchBar from "./components/SearchBar/SearchBar";
 import ImageGallery from "./components/ImageGallery/ImageGallery";
 import ErrorMessage from "./components/ErrorMessage/ErrorMessage";
 import Loader from "./components/Loader/Loader";
 import LoadMoreBtn from "./components/LoadMoreBtn/LoadMoreBtn";
+import ImageModal from "./components/ImageModal/ImageModal";
 import { fetchImages } from "./fetch-api";
-import toast, { Toaster } from "react-hot-toast";
+import { Toaster, toast } from "react-hot-toast";
 
 function App() {
   const [images, setImages] = useState([]);
@@ -13,7 +14,8 @@ function App() {
   const [error, setError] = useState(false);
   const [page, setPage] = useState(1);
   const [query, setQuery] = useState("");
-  const [showBtn, setShowBtn] = useState(false);
+  const [modalIsOpen, setModalIsOpen] = useState(false);
+  const [selectedImage, setSelectedImage] = useState(null);
 
   useEffect(() => {
     if (!query) return;
@@ -24,18 +26,15 @@ function App() {
         setError(false);
 
         const data = await fetchImages(query, page);
-
+        if (data.results.length === 0) {
+          toast.error("No images found");
+        }
         setImages((prevImages) =>
           page === 1 ? data.results : [...prevImages, ...data.results]
         );
-
-        if (data.results.length === 0) {
-          toast.error("No images found for this query");
-        }
-
-        setShowBtn(data.total_pages && data.total_pages !== page);
       } catch (error) {
         setError(true);
+        toast.error("Error fetching images");
       } finally {
         setLoading(false);
       }
@@ -54,6 +53,16 @@ function App() {
     setPage((prevPage) => prevPage + 1);
   };
 
+  const openModal = (image) => {
+    setSelectedImage(image);
+    setModalIsOpen(true);
+  };
+
+  const closeModal = () => {
+    setModalIsOpen(false);
+    setSelectedImage(null);
+  };
+
   return (
     <div>
       <SearchBar onSubmit={handleSearch} />
@@ -68,11 +77,20 @@ function App() {
           },
         }}
       />
-      {error ? <ErrorMessage /> : <ImageGallery images={images} />}
+      {error ? (
+        <ErrorMessage />
+      ) : (
+        <ImageGallery images={images} onImageClick={openModal} />
+      )}
       {loading && <Loader />}
-      {images.length > 0 && !loading && showBtn && (
+      {images.length > 0 && !loading && (
         <LoadMoreBtn onLoadMore={loadMoreImages} />
       )}
+      <ImageModal
+        isOpen={modalIsOpen}
+        onRequestClose={closeModal}
+        image={selectedImage}
+      />
     </div>
   );
 }
