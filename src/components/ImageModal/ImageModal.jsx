@@ -25,26 +25,28 @@ const ImageModal = ({ isOpen, onRequestClose, image }) => {
       isOpen={isOpen}
       onRequestClose={onRequestClose}
       style={customStyles}
-      overlayClassName={css.darkOverlay}
-      className={css.modal}
+      overlayClassName={css.overlay}
+      className={css.imageModal}
       contentLabel="Image Modal"
     >
-      <img
-        src={image.urls.full}
-        alt={image.alt_description}
-        className={css.image}
-      />
-      <div className={css.info}>
-        <p>
-          <strong>Author:</strong> {image.user.name}
-        </p>
-        <p>
-          <strong>Likes:</strong> {image.likes}
-        </p>
-        <p>
-          <strong>Description:</strong>{" "}
-          {image.alt_description || "No description available."}
-        </p>
+      <div className={css.imageContainer}>
+        <img
+          src={image.urls.full}
+          alt={image.alt_description}
+          className={css.image}
+        />
+        <div className={css.info}>
+          <p>
+            <strong>Author:</strong> {image.user.name}
+          </p>
+          <p>
+            <strong>Likes:</strong> {image.likes}
+          </p>
+          <p>
+            <strong>Description:</strong>{" "}
+            {image.alt_description || "No description available."}
+          </p>
+        </div>
       </div>
     </Modal>
   );
