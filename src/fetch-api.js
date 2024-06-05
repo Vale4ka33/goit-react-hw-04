@@ -21,5 +21,8 @@ export const fetchImages = async (
       client_id: "l-kGt3-mqxSrEvCYzUICKZOTNNe8lBSyukoITC0joU4",
     },
   });
-  return response.data.results;
+  return {
+    results: response.data.results,
+    total_pages: response.data.total_pages,
+  };
 };

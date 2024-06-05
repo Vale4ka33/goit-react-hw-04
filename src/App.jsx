@@ -1,11 +1,11 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import SearchBar from "./components/SearchBar/SearchBar";
 import ImageGallery from "./components/ImageGallery/ImageGallery";
 import ErrorMessage from "./components/ErrorMessage/ErrorMessage";
 import Loader from "./components/Loader/Loader";
 import LoadMoreBtn from "./components/LoadMoreBtn/LoadMoreBtn";
 import { fetchImages } from "./fetch-api";
-import { Toaster } from "react-hot-toast";
+import toast, { Toaster } from "react-hot-toast";
 
 function App() {
   const [images, setImages] = useState([]);
@@ -13,37 +13,45 @@ function App() {
   const [error, setError] = useState(false);
   const [page, setPage] = useState(1);
   const [query, setQuery] = useState("");
-  const [totalPages, setTotalPages] = useState(1);
+  const [showBtn, setShowBtn] = useState(false);
 
-  const handleSearch = async (newQuery) => {
-    try {
-      setLoading(true);
-      setError(false);
-      setImages([]);
+  useEffect(() => {
+    if (!query) return;
 
-      const data = await fetchImages(newQuery);
-      setImages(data);
-      setPage(1);
-      setQuery(newQuery);
-    } catch (error) {
-      setError(true);
-    } finally {
-      setLoading(false);
-    }
+    const loadImages = async () => {
+      try {
+        setLoading(true);
+        setError(false);
+
+        const data = await fetchImages(query, page);
+
+        setImages((prevImages) =>
+          page === 1 ? data.results : [...prevImages, ...data.results]
+        );
+
+        if (data.results.length === 0) {
+          toast.error("No images found for this query");
+        }
+
+        setShowBtn(data.total_pages && data.total_pages !== page);
+      } catch (error) {
+        setError(true);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadImages();
+  }, [query, page]);
+
+  const handleSearch = (newQuery) => {
+    setImages([]);
+    setPage(1);
+    setQuery(newQuery);
   };
-  const loadMoreImages = async () => {
-    try {
-      setLoading(true);
 
-      const nextPage = page + 1;
-      const data = await fetchImages(query, nextPage);
-      setImages((prevImages) => [...prevImages, ...data]);
-      setPage(nextPage);
-    } catch (error) {
-      setError(true);
-    } finally {
-      setLoading(false);
-    }
+  const loadMoreImages = () => {
+    setPage((prevPage) => prevPage + 1);
   };
 
   return (
@@ -62,7 +70,7 @@ function App() {
       />
       {error ? <ErrorMessage /> : <ImageGallery images={images} />}
       {loading && <Loader />}
-      {images.length > 0 && !loading && (
+      {images.length > 0 && !loading && showBtn && (
         <LoadMoreBtn onLoadMore={loadMoreImages} />
       )}
     </div>
