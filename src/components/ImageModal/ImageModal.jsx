@@ -18,8 +18,6 @@ const customStyles = {
 };
 
 const ImageModal = ({ isOpen, onRequestClose, image }) => {
-  if (!image) return null;
-
   return (
     <Modal
       isOpen={isOpen}
@@ -31,20 +29,20 @@ const ImageModal = ({ isOpen, onRequestClose, image }) => {
     >
       <div className={css.imageContainer}>
         <img
-          src={image.urls.full}
-          alt={image.alt_description}
+          src={image?.urls?.full}
+          alt={image?.alt_description}
           className={css.image}
         />
         <div className={css.info}>
           <p>
-            <strong>Author:</strong> {image.user.name}
+            <strong>Author:</strong> {image?.user?.name}
           </p>
           <p>
-            <strong>Likes:</strong> {image.likes}
+            <strong>Likes:</strong> {image?.likes}
           </p>
           <p>
             <strong>Description:</strong>{" "}
-            {image.alt_description || "No description available."}
+            {image?.alt_description || "No description available."}
           </p>
         </div>
       </div>
